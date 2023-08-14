@@ -1101,7 +1101,7 @@ class PySRRegressor(MultiOutputMixin, RegressorMixin, BaseEstimator):
             est.fit(X,y)
             predicted_functions = est.retrieve_tree(all_trees=True)
             binary_op, unary_op = get_operators(predicted_functions)
-
+            print(binary_op, unary_op)
             if mode == 'operators':
                 model = cls(
                     binary_operators = binary_op,
