@@ -1084,10 +1084,7 @@ class PySRRegressor(MultiOutputMixin, RegressorMixin, BaseEstimator):
             The results of pykjkjsr.
         """
         if mode is None:
-            model = cls(
-                    binary_operators = ['+', '*', '/'],
-                    unary_operators = ['sin', 'cos', 'exp', 'log', 'sqrt'],
-                    **kwargs)
+            model = cls(**kwargs)
         
         else:
             assert X is not None
@@ -1103,7 +1100,7 @@ class PySRRegressor(MultiOutputMixin, RegressorMixin, BaseEstimator):
                             )
             est.fit(X,y)
             predicted_functions = est.retrieve_tree(all_trees=True)
-            binary_op, unary_op = get_operators(predicted_functions)
+            unary_op, binary_op = get_operators(predicted_functions)
 
             if mode == 'operators':
                 model = cls(
