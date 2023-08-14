@@ -1102,6 +1102,7 @@ class PySRRegressor(MultiOutputMixin, RegressorMixin, BaseEstimator):
             predicted_functions = est.retrieve_tree(all_trees=True)
             binary_op, unary_op = get_operators(predicted_functions)
 
+            if kwargs is None: kwargs = {}
             kwargs['binary_operators'] = binary_op
             kwargs['unary_operators'] = unary_op
 
