@@ -35,7 +35,7 @@ from .export_numpy import CallableEquation
 from .export_latex import generate_single_table, generate_multiple_tables, to_latex
 from .deprecated import make_deprecated_kwargs_for_pysr_regressor
 
-from pysr_helpers import load_model_from_url, get_operators, create_expressions
+from .pysr_helpers import load_model_from_url, get_operators, create_expressions
 import symbolicregression
 
 Main = None  # TODO: Rename to more descriptive name like "julia_runtime"
