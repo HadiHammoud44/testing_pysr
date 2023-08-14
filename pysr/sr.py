@@ -1113,9 +1113,7 @@ class PySRRegressor(MultiOutputMixin, RegressorMixin, BaseEstimator):
                 temp_csv = create_expressions(predicted_functions)
                 model = cls.from_file(
                 temp_csv.name,
-                binary_operators=binary_op,
-                unary_operators=unary_op,
-                n_features_in= len(est.top_k_features[0]),
+                n_features_in = len(est.top_k_features[0]),
                 #feature_names_in=None,
                 **kwargs
                 )
