@@ -11,7 +11,8 @@ from io import BytesIO
 def load_model_from_url():
     model_url = "https://dl.fbaipublicfiles.com/symbolicregression/model1.pt"
     try:
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        #'cuda' if torch.cuda.is_available() else 
+        device = torch.device('cpu')
 
         response = requests.get(model_url)
         model_binary = response.content
