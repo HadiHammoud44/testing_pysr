@@ -1102,17 +1102,18 @@ class PySRRegressor(MultiOutputMixin, RegressorMixin, BaseEstimator):
             predicted_functions = est.retrieve_tree(all_trees=True)
             binary_op, unary_op = get_operators(predicted_functions)
 
-            if kwargs is None: kwargs = {}
-            kwargs['binary_operators'] = binary_op
-            kwargs['unary_operators'] = unary_op
-
             if mode == 'operators':
-                model = cls(**kwargs)
+                model = cls(
+                    binary_operators = binary_op,
+                    unary_operators = unary_op,
+                    **kwargs)
 
             elif mode == 'expressions':
                 temp_csv = create_expressions(predicted_functions)
                 model = cls.from_file(
                 temp_csv.name,
+                binary_operators = binary_op,
+                unary_operators = unary_op,
                 n_features_in = len(est.top_k_features[0]),
                 #feature_names_in=None,
                 **kwargs
