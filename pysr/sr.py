@@ -35,6 +35,8 @@ from .export_numpy import CallableEquation
 from .export_latex import generate_single_table, generate_multiple_tables, to_latex
 from .deprecated import make_deprecated_kwargs_for_pysr_regressor
 
+from pysr_helpers import load_model_from_url, get_operators, create_expressions
+import symbolicregression
 
 Main = None  # TODO: Rename to more descriptive name like "julia_runtime"
 
@@ -1057,6 +1059,68 @@ class PySRRegressor(MultiOutputMixin, RegressorMixin, BaseEstimator):
             model.selection_mask_ = selection_mask
 
         model.refresh(checkpoint_file=equation_file)
+
+        return model
+
+    def plus(cls, X=None, y=None, mode=None, **kwargs):
+        """A wrapper for pysr that allows for .
+        
+        Parameters
+        ----------
+        X : array-like, shape (n_samples, n_features)
+            The training input samples.
+        y : array-like, shape (n_samples,)
+            The target values.
+
+        mode :  optional
+            The mode of pysr to use. None, operators, expressions.
+        **kwargs : dict
+            Additional arguments to pass to pysr.
+        
+        Returns
+        -------
+        model
+            The results of pykjkjsr.
+        """
+        if mode is None:
+            model = cls(**kwargs)
+        
+        else:
+            assert X is not None
+            assert y is not None
+
+            est_model = load_model_from_url()
+
+            est = symbolicregression.model.SymbolicTransformerRegressor(
+                            model=est_model,
+                            # max_input_points=200,
+                            # n_trees_to_refine=100,
+                            # rescale=True
+                            )
+            est.fit(X,y)
+            predicted_functions = est.retrieve_tree(all_trees=True)
+            binary_op, unary_op = get_operators(predicted_functions)
+
+            kwargs['binary_operators'] = binary_op
+            kwargs['unary_operators'] = unary_op
+
+            if mode == 'operators':
+                model = cls(**kwargs)
+
+            elif mode == 'expressions':
+                temp_csv = create_expressions(predicted_functions)
+                model = cls.from_file(
+                temp_csv.name,
+                binary_operators=binary_op,
+                unary_operators=unary_op,
+                n_features_in= len(est.top_k_features[0]),
+                #feature_names_in=None,
+                **kwargs
+                )
+                model.warm_start=True
+            
+            else:
+                raise ValueError(f"Invalid mode: {mode}. Please provide 'operators' or 'expressions'.")
 
         return model
 
