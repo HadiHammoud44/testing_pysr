@@ -1062,6 +1062,7 @@ class PySRRegressor(MultiOutputMixin, RegressorMixin, BaseEstimator):
 
         return model
 
+    @classmethod
     def plus(cls, X=None, y=None, mode=None, **kwargs):
         """A wrapper for pysr that allows for .
         
