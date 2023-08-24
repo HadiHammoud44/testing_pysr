@@ -1094,8 +1094,8 @@ class PySRRegressor(MultiOutputMixin, RegressorMixin, BaseEstimator):
 
             est = symbolicregression.model.SymbolicTransformerRegressor(
                             model=est_model,
-                            # max_input_points=200,
-                            # n_trees_to_refine=100,
+                            max_input_points=200,
+                            n_trees_to_refine=1,
                             # rescale=True
                             )
             est.fit(X,y)
