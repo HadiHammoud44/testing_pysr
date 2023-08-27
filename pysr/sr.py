@@ -1099,6 +1099,11 @@ class PySRRegressor(MultiOutputMixin, RegressorMixin, BaseEstimator):
                             )
             est.fit(X,y)
             predicted_functions = est.retrieve_tree(all_trees=True)
+
+            for func in predicted_functions:
+                result = est.evaluate_tree(func,  X, y, metric="_complexity")
+                print(result)
+            print("#########################################################")
             unary_op = get_operators(predicted_functions[0:2])
             print(unary_op)###################
             if mode == 'operators':
