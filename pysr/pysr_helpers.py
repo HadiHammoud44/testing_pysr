@@ -11,7 +11,6 @@ from io import BytesIO
 def load_model_from_url(device='cpu'):
     model_url = "https://dl.fbaipublicfiles.com/symbolicregression/model1.pt"
     try:
-        #'cuda' if torch.cuda.is_available() else 
         device = torch.device(device)
 
         response = requests.get(model_url)
@@ -83,3 +82,19 @@ def create_expressions(predicted_functions):
         temp_csv.seek(0)
 
     return temp_csv
+
+def select_nested_constraints(nested_constraints, ops_list):
+    selected_nested_constraints = {
+        op: {
+            sub_op: nested_constraints[op][sub_op] for sub_op in nested_constraints[op] if sub_op in ops_list
+        }
+        for op in ops_list if op in nested_constraints
+    }
+    return selected_nested_constraints
+
+
+def select_constraints(constraints, ops_list):
+    selected_constraints = {
+        op: value for op, value in constraints.items() if op in ops_list
+    }
+    return selected_constraints

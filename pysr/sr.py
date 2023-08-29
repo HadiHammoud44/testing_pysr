@@ -35,7 +35,7 @@ from .export_numpy import CallableEquation
 from .export_latex import generate_single_table, generate_multiple_tables, to_latex
 from .deprecated import make_deprecated_kwargs_for_pysr_regressor
 
-from .pysr_helpers import load_model_from_url, get_operators, create_expressions
+from .pysr_helpers import load_model_from_url, get_operators, create_expressions, select_constraints, select_nested_constraints
 import symbolicregression
 
 Main = None  # TODO: Rename to more descriptive name like "julia_runtime"
@@ -1100,15 +1100,30 @@ class PySRRegressor(MultiOutputMixin, RegressorMixin, BaseEstimator):
             est.fit(X,y)
             predicted_functions = est.retrieve_tree(all_trees=True)
 
+            print("#########################################################")
             for func in predicted_functions:
                 result = est.evaluate_tree(func,  X, y, metric="_complexity")
                 print(result)
-            print("#########################################################")
             unary_op = get_operators(predicted_functions[0:2])
+            binary_op = ["+", "-", "*", "/"]
             print(unary_op)###################
+
+
+            
+            if kwargs["constraints"] is not None:
+                print(kwargs["constraints"])
+                kwargs["constraints"] = select_constraints(kwargs["constraints"], unary_op+binary_op)
+                print(kwargs["constraints"])
+
+            if kwargs["nested_constraints"] is not None:
+                print(kwargs["nested_constraints"])
+                kwargs["nested_constraints"] = select_nested_constraints(kwargs["nested_constraints"], unary_op+binary_op)
+                print(kwargs["nested_constraints"])
+                
             if mode == 'operators':
                 model = cls(
                     unary_operators = unary_op,
+                    binary_operators = binary_op,
                     **kwargs
                     )
 
@@ -1117,8 +1132,8 @@ class PySRRegressor(MultiOutputMixin, RegressorMixin, BaseEstimator):
                 model = cls.from_file(
                 temp_csv.name,
                 unary_operators = unary_op,
+                binary_operators = binary_op,
                 n_features_in = len(est.top_k_features[0]),
-                #feature_names_in=None,
                 **kwargs
                 )
                 model.warm_start=True
