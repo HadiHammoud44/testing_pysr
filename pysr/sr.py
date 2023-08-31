@@ -1063,7 +1063,7 @@ class PySRRegressor(MultiOutputMixin, RegressorMixin, BaseEstimator):
         return model
 
     @classmethod
-    def plus(cls, X=None, y=None, mode=None, top=2, **kwargs):
+    def plus(cls, X=None, y=None, mode=None, top=2, beam_temperature=0.5, **kwargs):
         """A wrapper for pysr that allows for .
         
         Parameters
@@ -1091,7 +1091,7 @@ class PySRRegressor(MultiOutputMixin, RegressorMixin, BaseEstimator):
             assert y is not None
 
             est_model = load_model_from_url()
-            est_model.beam_temperature = 0.5
+            est_model.beam_temperature = beam_temperature
 
             est = symbolicregression.model.SymbolicTransformerRegressor(
                             model=est_model,
