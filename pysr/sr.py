@@ -1091,7 +1091,7 @@ class PySRRegressor(MultiOutputMixin, RegressorMixin, BaseEstimator):
             assert y is not None
 
             est_model = load_model_from_url()
-            est_model.temperature = 0.5
+            est_model.beam_temperature = 0.5
 
             est = symbolicregression.model.SymbolicTransformerRegressor(
                             model=est_model,
