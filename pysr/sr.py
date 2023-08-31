@@ -1063,7 +1063,7 @@ class PySRRegressor(MultiOutputMixin, RegressorMixin, BaseEstimator):
         return model
 
     @classmethod
-    def plus(cls, X=None, y=None, mode=None, **kwargs):
+    def plus(cls, X=None, y=None, mode=None, top=2, **kwargs):
         """A wrapper for pysr that allows for .
         
         Parameters
@@ -1091,6 +1091,7 @@ class PySRRegressor(MultiOutputMixin, RegressorMixin, BaseEstimator):
             assert y is not None
 
             est_model = load_model_from_url()
+            est_model.temperature = 0.5
 
             est = symbolicregression.model.SymbolicTransformerRegressor(
                             model=est_model,
@@ -1100,26 +1101,21 @@ class PySRRegressor(MultiOutputMixin, RegressorMixin, BaseEstimator):
             est.fit(X,y)
             predicted_functions = est.retrieve_tree(all_trees=True)
 
-            print("#########################################################")
-            for func in predicted_functions:
-                result = est.evaluate_tree(func,  X, y, metric="_complexity")
-                print(result)
-            unary_op = get_operators(predicted_functions[0:2])
+            # print("#########################################################")
+            # for func in predicted_functions:
+            #     result = est.evaluate_tree(func,  X, y, metric="_complexity")
+            #     print(result)
+            while top >= len(predicted_functions): top -= 1
+
+            unary_op = get_operators(predicted_functions[0:top])
             binary_op = ["+", "-", "*", "/"]
-            print(unary_op)###################
 
-
-            
             if kwargs["constraints"] is not None:
-                print(kwargs["constraints"])
                 kwargs["constraints"] = select_constraints(kwargs["constraints"], unary_op+binary_op)
-                print(kwargs["constraints"])
 
             if kwargs["nested_constraints"] is not None:
-                print(kwargs["nested_constraints"])
                 kwargs["nested_constraints"] = select_nested_constraints(kwargs["nested_constraints"], unary_op+binary_op)
-                print(kwargs["nested_constraints"])
-                
+
             if mode == 'operators':
                 model = cls(
                     unary_operators = unary_op,

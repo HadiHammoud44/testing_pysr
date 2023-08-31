@@ -62,10 +62,10 @@ def create_expressions(predicted_functions):
     filtered_functions = (func for func in predicted_functions if all(op in best_uni_op for op in get_operators([func,])))
 
     # Apply the replacement function to each element in the 'filtered_functions' list
-    simplified_functions = (sp.expand(replace_operations(func.infix(), replace_ops)) for func in filtered_functions)
+    expanded_functions = (sp.expand(replace_operations(func.infix(), replace_ops)) for func in filtered_functions)
 
     # Create a list of dictionaries with the specified columns using a list comprehension
-    data = [{'equation': sp.sstr(equation), 'loss': 0, 'complexity': 1} for equation in simplified_functions]
+    data = [{'equation': sp.sstr(equation), 'loss': 0, 'complexity': 1} for equation in expanded_functions]
 
     # Create a temporary in-memory CSV file
     with tempfile.NamedTemporaryFile(mode='w+', suffix='.csv', delete=False, newline='') as temp_csv:
