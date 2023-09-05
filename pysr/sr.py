@@ -1092,11 +1092,12 @@ class PySRRegressor(MultiOutputMixin, RegressorMixin, BaseEstimator):
 
             est_model = load_model_from_url()
             est_model.beam_temperature = beam_temperature
+            est_model.beam_size = 30
 
             est = symbolicregression.model.SymbolicTransformerRegressor(
                             model=est_model,
                             max_input_points=200,
-                            n_trees_to_refine=1,
+                            n_trees_to_refine=10,
                             )
             est.fit(X,y)
             predicted_functions = est.retrieve_tree(all_trees=True)
