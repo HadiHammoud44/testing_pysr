@@ -9,21 +9,37 @@ import symbolicregression
 from io import BytesIO
 
 def load_model_from_url(device='cpu'):
-    model_url = "https://dl.fbaipublicfiles.com/symbolicregression/model1.pt"
+    # model_url = "https://dl.fbaipublicfiles.com/symbolicregression/model1.pt"
+    # try:
+    #     device = torch.device(device)
+
+    #     response = requests.get(model_url)
+    #     model_binary = response.content
+
+    #     model = torch.load(BytesIO(model_binary), map_location=device)
+    #     model.to(device)
+    #     return model
+
+    # except Exception as e:
+    #     print("ERROR: Model not loaded! Error details:")
+    #     print(e) 
+    #     return None
+    model_path = "model.pt" 
     try:
-        device = torch.device(device)
-
-        response = requests.get(model_url)
-        model_binary = response.content
-
-        model = torch.load(BytesIO(model_binary), map_location=device)
-        model.to(device)
+        if not os.path.isfile(model_path): 
+            url = "https://dl.fbaipublicfiles.com/symbolicregression/model1.pt"
+            r = requests.get(url, allow_redirects=True)
+            open(model_path, 'wb').write(r.content)
+        if device == 'cpu':
+            model = torch.load(model_path, map_location=torch.device('cpu'))
+        else:
+            model = torch.load(model_path)
+            model = model.cuda()
         return model
 
     except Exception as e:
-        print("ERROR: Model not loaded! Error details:")
-        print(e) 
-        return None
+        print("ERROR: model not loaded! path was: {}".format(model_path))
+        print(e)    
 
 
 def get_operators(predicted_functions):
