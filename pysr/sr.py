@@ -1063,7 +1063,7 @@ class PySRRegressor(MultiOutputMixin, RegressorMixin, BaseEstimator):
         return model
 
     @classmethod
-    def plus(cls, X=None, y=None, mode=None, top=2, beam_temperature=0.5, **kwargs):
+    def plus(cls, X=None, y=None, mode=None, top=3, beam_temperature=0.3, beam_size=50, save_transformer_params=True, model_path='model.pt', **kwargs):
         """A wrapper for pysr that allows for .
         
         Parameters
@@ -1090,9 +1090,9 @@ class PySRRegressor(MultiOutputMixin, RegressorMixin, BaseEstimator):
             assert X is not None
             assert y is not None
 
-            est_model = load_model_from_url()
+            est_model = load_model_from_url(save_transformer_params=save_transformer_params, model_path=model_path)
             est_model.beam_temperature = beam_temperature
-            est_model.beam_size = 30
+            est_model.beam_size = beam_size
 
             est = symbolicregression.model.SymbolicTransformerRegressor(
                             model=est_model,
@@ -1102,10 +1102,6 @@ class PySRRegressor(MultiOutputMixin, RegressorMixin, BaseEstimator):
             est.fit(X,y)
             predicted_functions = est.retrieve_tree(all_trees=True)
 
-            # print("#########################################################")
-            # for func in predicted_functions:
-            #     result = est.evaluate_tree(func,  X, y, metric="_complexity")
-            #     print(result)
             while top >= len(predicted_functions): top -= 1
 
             unary_op = get_operators(predicted_functions[0:top])
@@ -1125,7 +1121,7 @@ class PySRRegressor(MultiOutputMixin, RegressorMixin, BaseEstimator):
                     )
 
             elif mode == 'expressions':
-                temp_csv = create_expressions(predicted_functions)
+                temp_csv = create_expressions(predicted_functions, unary_op)
                 model = cls.from_file(
                 temp_csv.name,
                 unary_operators = unary_op,

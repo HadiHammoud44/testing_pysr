@@ -8,38 +8,34 @@ import tempfile
 import symbolicregression
 from io import BytesIO
 
-def load_model_from_url(device='cpu'):
-    # model_url = "https://dl.fbaipublicfiles.com/symbolicregression/model1.pt"
-    # try:
-    #     device = torch.device(device)
+def load_model_from_url(save_transformer_params=False, model_path='model.pt'):
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    model_url = "https://dl.fbaipublicfiles.com/symbolicregression/model1.pt"
+    if not save_transformer_params:
+        try:
+            response = requests.get(model_url)
+            model_binary = response.content
 
-    #     response = requests.get(model_url)
-    #     model_binary = response.content
+            model = torch.load(BytesIO(model_binary), map_location=device)
+            model.to(device)
+            return model
 
-    #     model = torch.load(BytesIO(model_binary), map_location=device)
-    #     model.to(device)
-    #     return model
+        except Exception as e:
+            print("ERROR: Model not loaded! Error details:")
+            print(e) 
+            return None
+    else:
+        try:
+            if not os.path.isfile(model_path): 
+                r = requests.get(model_url, allow_redirects=True)
+                open(model_path, 'wb').write(r.content)
+            model = torch.load(model_path, map_location=device)
+            model.to(device)
+            return model
 
-    # except Exception as e:
-    #     print("ERROR: Model not loaded! Error details:")
-    #     print(e) 
-    #     return None
-    model_path = "model.pt" 
-    try:
-        if not os.path.isfile(model_path): 
-            url = "https://dl.fbaipublicfiles.com/symbolicregression/model1.pt"
-            r = requests.get(url, allow_redirects=True)
-            open(model_path, 'wb').write(r.content)
-        if device == 'cpu':
-            model = torch.load(model_path, map_location=torch.device('cpu'))
-        else:
-            model = torch.load(model_path)
-            model = model.cuda()
-        return model
-
-    except Exception as e:
-        print("ERROR: model not loaded! path was: {}".format(model_path))
-        print(e)    
+        except Exception as e:
+            print("ERROR: Model not loaded! Error details:")
+            print(e)   
 
 
 def get_operators(predicted_functions):
@@ -64,18 +60,14 @@ def get_operators(predicted_functions):
 
 
 
-def create_expressions(predicted_functions):
+def create_expressions(predicted_functions, top_uni_ops):
     replace_ops = {"add": "+", "mul": "*", "sub": "-", "pow": "**", "inv": "1/"}
 
     def replace_operations(input_string, replace_ops):
         return reduce(lambda s, kv: s.replace(*kv), replace_ops.items(), input_string)
 
-    # Extract the unary operators from the best function
-    best_fx = predicted_functions[:2]
-    best_uni_op = get_operators(best_fx)
-
     # Filter out equations with unary operators not in best_uni_op
-    filtered_functions = (func for func in predicted_functions if all(op in best_uni_op for op in get_operators([func,])))
+    filtered_functions = (func for func in predicted_functions if all(op in top_uni_ops for op in get_operators([func,])))
 
     # Apply the replacement function to each element in the 'filtered_functions' list
     expanded_functions = (sp.expand(replace_operations(func.infix(), replace_ops)) for func in filtered_functions)
